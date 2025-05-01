@@ -1,7 +1,6 @@
 // src/services/classification.ts
-
 import OpenAI from 'openai';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 export interface ClassificationResult {
   categories: string[];
@@ -11,9 +10,18 @@ export interface ClassificationResult {
   error?: string;
 }
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Create OpenAI instance only if API key is present
+const createOpenAI = () => {
+  if (!process.env.OPENAI_API_KEY) {
+    logger.warn('OpenAI API key not found. AI classification features will be disabled.');
+    return null;
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+};
+
+const openai = createOpenAI();
 
 /**
  * Uses OpenAI GPT to classify article content.
@@ -26,7 +34,7 @@ export const classifyContent = async (
   title: string,
   content: string
 ): Promise<ClassificationResult> => {
-  if (!process.env.OPENAI_API_KEY) {
+  if (!openai) {
     return {
       categories: ['Uncategorized'],
       topics: [],

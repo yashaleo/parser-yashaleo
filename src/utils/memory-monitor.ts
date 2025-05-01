@@ -1,5 +1,5 @@
 // src/utils/memory-monitor.ts
-import logger from './logger';
+import logger from './logger.js';
 
 // Add TypeScript declaration for global.gc
 // Declare gc on global object properly

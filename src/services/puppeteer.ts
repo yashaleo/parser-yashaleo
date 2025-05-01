@@ -1,14 +1,14 @@
 // src/services/puppeteer.ts
 
 import puppeteer from 'puppeteer';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 import type { Page } from 'puppeteer';
 /**
  * Fetches and renders HTML content from a URL using Puppeteer for JavaScript execution
  */
 export const fetchDynamicContent = async (url: string): Promise<string> => {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: true, // Using config.puppeteer.headless would be even better
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 

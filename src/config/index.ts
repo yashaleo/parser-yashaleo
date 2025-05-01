@@ -21,7 +21,7 @@ interface Config {
   };
   puppeteer: {
     enabled: boolean;
-    headless: boolean | 'new'; // 👈 allow 'new' explicitly
+    headless: boolean | "new" | "shell"; // 👈 Update this line to include "new" and "shell"
     userAgent: string;
     timeout: number;
   };

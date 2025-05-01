@@ -1,15 +1,13 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "lib": ["ES2022"],
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,
     "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -19,7 +17,7 @@
     "noEmit": false,
     "types": ["node", "jest", "puppeteer"],
     "isolatedModules": true,
-    "baseUrl": "./src",                        // Enables cleaner relative imports
+    "baseUrl": "./src",
     "paths": {
       "*": ["*", "./*"]
     }

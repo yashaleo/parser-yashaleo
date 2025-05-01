@@ -1,6 +1,6 @@
 // src/utils/cache.ts
 import NodeCache from 'node-cache';
-import config from '../config';
+import config from '../config/index.js';
 
 const cache = new NodeCache({
   stdTTL: config.parser.cacheTTL, // Time to live in seconds

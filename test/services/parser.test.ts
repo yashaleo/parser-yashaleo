@@ -1,15 +1,16 @@
-import { parse, parseHtml } from '../../src/services/parser';
-import { fetchWithRetry } from '../../src/utils/http';
-import { fetchDynamicContent } from '../../src/services/puppeteer';
+import { parse, parseHtml } from '../../src/services/parser.js';
+import { fetchWithRetry } from '../../src/utils/http.js';
+import { fetchDynamicContent } from '../../src/services/puppeteer.js';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('../../src/utils/http', () => ({
   fetchWithRetry: jest.fn(),
 }));
 
-jest.mock('../../src/services/puppeteer', () => ({
-  fetchDynamicContent: jest.fn(),
-}));
+jest.mock('../../src/utils/http.js', () => ({
+  fetchWithRetry: jest.fn(),
+}), { virtual: true });
 
 jest.mock('@mozilla/readability', () => ({
   Readability: jest.fn().mockImplementation(() => ({

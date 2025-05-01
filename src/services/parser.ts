@@ -3,10 +3,10 @@
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
 import TurndownService from 'turndown';
-import { fetchWithRetry } from '../utils/http';
-import { fetchDynamicContent } from './puppeteer';
-import { summarizeContent } from './ai';
-import logger from '../utils/logger';
+import { fetchWithRetry } from '../utils/http.js';
+import { fetchDynamicContent } from './puppeteer.js';
+import { summarizeContent } from './ai.js';
+import logger from '../utils/logger.js';
 
 interface ParserOptions {
   format?: 'html' | 'markdown' | 'text';

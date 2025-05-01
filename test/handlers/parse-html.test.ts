@@ -1,4 +1,6 @@
-import parseHtml from '../../src/handlers/parse-html';
+import { Readability } from '@mozilla/readability';
+import parseHtml from '../../src/handlers/parse-html.js';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 jest.mock('@mozilla/readability', () => ({
   Readability: jest.fn().mockImplementation(() => ({
@@ -59,7 +61,7 @@ describe('parseHtml handler', () => {
 
   it('should handle parsing errors', async () => {
     // Force Readability to return null just for this test
-    const mockReadability = require('@mozilla/readability').Readability;
+    const mockReadability = jest.mocked(Readability);
     mockReadability.mockImplementationOnce(() => ({
       parse: jest.fn().mockReturnValue(null),
     }));

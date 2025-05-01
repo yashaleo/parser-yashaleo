@@ -1,13 +1,14 @@
 // test/services/puppeteer.test.ts
-import puppeteer from 'puppeteer';
-import { fetchDynamicContent } from '../../src/services/puppeteer';
+import * as puppeteer from 'puppeteer';
+import { fetchDynamicContent } from '../../src/services/puppeteer.js';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // Mock the logger to prevent console output during tests
-jest.mock('../../src/utils/logger', () => ({
+jest.mock('../../src/utils/logger.js', () => ({
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn()
-}));
+}), { virtual: true });
 
 // Mock puppeteer
 jest.mock('puppeteer');

@@ -1,11 +1,11 @@
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
-import { parse } from '../services/parser';
-import { corsSuccessResponse, corsErrorResponse } from '../utils/lambda-response';
-import { isValidUrl } from '../utils/validators';
-import logger from '../utils/logger';
+import { parse } from '../services/parser.js';
+import { corsSuccessResponse, corsErrorResponse } from '../utils/lambda-response.js';
+import { isValidUrl } from '../utils/validators.js';
+import logger from '../utils/logger.js';
 
 const allowedFormats = ['html', 'markdown', 'text'] as const;
-type FormatType = typeof allowedFormats[number];
+type FormatType = (typeof allowedFormats)[number];
 
 export const handler = async (event: APIGatewayProxyEvent, _context: Context) => {
   try {

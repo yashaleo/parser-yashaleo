@@ -1,13 +1,15 @@
 // src/server.ts
 
+// src/server.ts
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
 import helmet from 'helmet';
-import parser from './handlers/parser';
-import parseHtml from './handlers/parse-html';
-import logger from './utils/logger';
+// Fix the imports to use .js extension (required for ESM)
+import parser from './handlers/parser.js';
+import parseHtml from './handlers/parse-html.js';
+import logger from './utils/logger.js';
 
 const app = express();
 const port = process.env.PORT || 10000;

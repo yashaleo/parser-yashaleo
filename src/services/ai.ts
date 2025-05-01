@@ -1,21 +1,30 @@
 // src/services/ai.ts
 import OpenAI from 'openai';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Create OpenAI instance only if API key is present
+const createOpenAI = () => {
+  if (!process.env.OPENAI_API_KEY) {
+    logger.warn('OpenAI API key not found. AI features will be disabled.');
+    return null;
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+};
+
+const openai = createOpenAI();
 
 /**
  * Summarizes article content using OpenAI GPT-4.
- *
+ * 
  * @param content - The full text content of the article
  * @returns A short summary string
  */
 export const summarizeContent = async (content: string): Promise<string> => {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OpenAI API key not configured');
+    if (!openai) {
+      return 'AI summarization is unavailable (missing API key)';
     }
 
     const prompt = `

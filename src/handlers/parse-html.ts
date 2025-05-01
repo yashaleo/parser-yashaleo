@@ -1,8 +1,8 @@
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
-import { parseHtml } from '../services/parser';
-import { corsSuccessResponse, corsErrorResponse } from '../utils/lambda-response';
-import { isValidUrl } from '../utils/validators';
-import logger from '../utils/logger'; // Import logger
+import { parseHtml } from '../services/parser.js';
+import { corsSuccessResponse, corsErrorResponse } from '../utils/lambda-response.js';
+import { isValidUrl } from '../utils/validators.js';
+import logger from '../utils/logger.js'; // Import logger
 
 export const handler = async (event: APIGatewayProxyEvent, _context: Context) => {
   try {

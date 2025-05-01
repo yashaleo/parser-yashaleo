@@ -1,77 +1,82 @@
-// src/parser.test.ts
-import { parse } from '../../src/services/parser';
-import { JSDOM } from 'jsdom';
-import { Readability } from '@mozilla/readability';
+// test/handlers/parser.test.ts
+import handler from '../../src/handlers/parser.js';
+import { parse } from '../../src/services/parser.js';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
-// Mock the fetch function
-global.fetch = jest.fn();
+// Mock the parse function
+jest.mock('../../src/services/parser.js', () => ({
+  parse: jest.fn(),
+}), { virtual: true });
 
-jest.mock('jsdom');
-jest.mock('@mozilla/readability');
+jest.mock('../../src/utils/logger.js', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn()
+}), { virtual: true });
 
-describe('Parser', () => {
+describe('Parser Handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  it('should parse a valid URL', async () => {
-    // Mock implementation
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      text: jest.fn().mockResolvedValueOnce('<html><body><article>Test content</article></body></html>'),
-    });
-
-    const mockArticle = {
+  
+  it('should return error when URL is missing', async () => {
+    const event = { queryStringParameters: {} };
+    
+    const response = await handler(event as any, {} as any);
+    
+    expect(response.statusCode).toBe(500);
+    expect(JSON.parse(response.body).message).toContain('Missing URL parameter');
+  });
+  
+  it('should return error for invalid URL', async () => {
+    const event = { queryStringParameters: { url: 'invalid-url' } };
+    
+    const response = await handler(event as any, {} as any);
+    
+    expect(response.statusCode).toBe(500);
+    expect(JSON.parse(response.body).message).toContain('Invalid URL format');
+  });
+  
+  it('should successfully parse URL and return result', async () => {
+    const mockResult = {
       title: 'Test Title',
-      content: '<article>Test content</article>',
-      textContent: 'Test content',
-      excerpt: 'Test excerpt',
+      content: '<div>Test Content</div>',
+      textContent: 'Test Content',
+      excerpt: 'Test Excerpt',
     };
-
-    // Mock Readability
-    (Readability as jest.Mock).mockImplementation(() => ({
-      parse: jest.fn().mockReturnValueOnce(mockArticle),
-    }));
     
-    // Mock JSDOM
-    (JSDOM as unknown as jest.Mock).mockImplementation(() => ({
-      window: {
-        document: {},
+    (parse as jest.Mock).mockResolvedValueOnce(mockResult);
+    
+    const event = {
+      queryStringParameters: {
+        url: 'https://example.com',
+        format: 'html',
+        summarize: 'true',
       },
-    }));
-
-    const result = await parse('https://example.com');
+    };
     
-    expect(result).toEqual(mockArticle);
-    expect(global.fetch).toHaveBeenCalledWith(
-      'https://example.com',
-      expect.objectContaining({
-        signal: expect.any(Object),
-        headers: expect.objectContaining({
-          'User-Agent': expect.any(String),
-        }),
-      })
-    );
-  }); // ✅ This was missing!
-
-  it('should handle parsing errors', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      text: jest.fn().mockResolvedValueOnce('<html><body>Invalid content</body></html>'),
+    const response = await handler(event as any, {} as any);
+    
+    expect(response.statusCode).toBe(200);
+    expect(parse).toHaveBeenCalledWith('https://example.com', {
+      format: 'html',
+      summarize: true,
     });
-
-    // Mock Readability to return null
-    (Readability as jest.Mock).mockImplementation(() => ({
-      parse: jest.fn().mockReturnValueOnce(null),
-    }));
+    expect(JSON.parse(response.body)).toEqual(mockResult);
+  });
+  
+  it('should handle parsing errors', async () => {
+    (parse as jest.Mock).mockRejectedValueOnce(new Error('Parse error'));
     
-    // Mock JSDOM
-    (JSDOM as unknown as jest.Mock).mockImplementation(() => ({
-      window: {
-        document: {},
+    const event = {
+      queryStringParameters: {
+        url: 'https://example.com',
       },
-    }));
-
-    await expect(parse('https://example.com')).rejects.toThrow('Failed to parse content');
+    };
+    
+    const response = await handler(event as any, {} as any);
+    
+    expect(response.statusCode).toBe(500);
+    expect(JSON.parse(response.body).message).toBe('Parse error');
   });
 });

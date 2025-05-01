@@ -1,6 +1,7 @@
 // src/utils/http.ts
 
 import fetch from 'node-fetch';
+import type { RequestInit } from 'node-fetch';
 
 interface RetryOptions {
   maxRetries: number;
@@ -23,14 +24,17 @@ export const fetchWithRetry = async (
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), options.timeout);
 
+      // Fix: Use correct headers type that's compatible with node-fetch
+      const headers = {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        ...(requestInit.headers || {}),
+      };
+
       const response = await fetch(url, {
         ...requestInit,
         signal: controller.signal,
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          ...requestInit.headers,
-        },
+        headers,
       });
 
       clearTimeout(timeoutId);
@@ -60,4 +64,4 @@ export const fetchWithRetry = async (
   throw lastError instanceof Error
     ? lastError
     : new Error('Unknown error during fetchWithRetry');
-};
+}
