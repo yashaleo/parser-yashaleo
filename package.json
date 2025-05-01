@@ -5,8 +5,8 @@
   "license": "MIT",
   "main": "src/handler.ts",
   "scripts": {
-    "build": "npx serverless webpack",
-    "start": "npx serverless offline start",
+    "build": "node_modules/.bin/serverless webpack",
+    "start": "node_modules/.bin/serverless offline start",
     "dev": "nodemon --exec serverless offline start",
     "test": "jest",
     "lint": "eslint ./src --fix",
