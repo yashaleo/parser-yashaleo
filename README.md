@@ -1,50 +1,124 @@
-# Postlight Parser API
+# Modern Web Content Parser API
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/postlight/parser-api.svg)](https://greenkeeper.io/)
+A modern, robust web content parser API built with Node.js and TypeScript. This API extracts clean, readable content from web pages, handling common challenges like paywalls, lazy-loading, and complex layouts.
 
-This repo provides a drop-in replacement for the [Postlight Parser](https://github.com/postlight/parser) API.
-In fact, this [AWS Lambda](https://aws.amazon.com/lambda/)-based API for running the Postlight Parser is the same code
-and serverless infrastructure that powered the Postlight Parser API.
+## Features
 
-## Installation
+- **Clean Content Extraction** - Extract the main content, title, author, and metadata from any web page
+- **Multiple Output Formats** - Get your content in HTML, Markdown, or plain text
+- **AI-powered Summarization** - Generate concise summaries of extracted content
+- **Support for Dynamic Content** - Handle JavaScript-rendered content with headless browser integration
+- **Robust Error Handling** - Automatic retries and comprehensive error reporting
+- **Flexible Deployment** - Deploy on Render.com, AWS, or other platforms
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18.18.2 or higher
+- Yarn package manager
+
+### Installation
 
 ```bash
-# If you don't already have the Postlight Parser api installed, do that
-git clone https://github.com/postlight/parser-api.git
+# Clone the repository
+git clone https://github.com/yourusername/web-content-parser-api.git
+
+# Navigate to the project directory
+cd web-content-parser-api
 
 # Install dependencies
 yarn install
 ```
 
-### API Gateway-like local dev server
+### Configuration
 
-To spin up a local dev server that will more closely match the API Gateway endpoint/experience:
+Create a `.env` file in the root directory with the following variables:
 
-```bash
-yarn serve
+```env
+# Required
+NODE_ENV=development
+PORT=4000
+
+# Optional - for AI summarization
+OPENAI_API_KEY=your_openai_api_key
 ```
 
-## Deploy
-
-Assuming you've already [set up your default AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration) (or have set a different AWS profile via [the profile field](serverless.yml#L21)), simply run:
+### Development
 
 ```bash
-yarn deploy
+# Run in development mode
+yarn dev
+
+# Lint code
+yarn lint
+
+# Run tests
+yarn test
 ```
 
-`yarn deploy` will deploy to "dev" environment. You can deploy to `stage` or `prod`
-with:
+### Deployment
 
-```bash
-yarn deploy:stage
+#### Deploy to Render.com
 
-# -- or --
+1. Fork this repository
+2. Create a new Web Service on Render
+3. Connect your forked repository
+4. Use the following settings:
+   - **Build Command**: `yarn build`
+   - **Start Command**: `yarn start`
+   - **Add the following environment variables**:
+     - `NODE_ENV`: `production`
+     - `PORT`: `10000`
+     - `OPENAI_API_KEY`: (if using AI summarization)
 
-yarn deploy:prod
+## API Usage
+
+### Parse URL
+
+```
+GET /parser?url=https://example.com/article
 ```
 
-After you've deployed, the output of the deploy script will give you the API endpoint
-for your deployed function(s), so you should be able to test the deployed API via that URL.
+#### Query Parameters
+
+- `url` (required): The URL to parse
+- `format`: Output format (`html`, `markdown`, or `text`). Default: `html`
+- `summarize`: Set to `true` to include AI-generated summary (requires OpenAI API key)
+
+#### Response
+
+```json
+{
+  "title": "Article Title",
+  "byline": "Author Name",
+  "content": "<p>The article content...</p>",
+  "textContent": "The article content...",
+  "excerpt": "A short excerpt...",
+  "siteName": "Example Site",
+  "publishedTime": "2025-04-25T12:00:00Z",
+  "summary": "AI-generated summary of the content (if requested)"
+}
+```
+
+### Parse HTML
+
+```
+POST /parse-html
+```
+
+#### Request Body
+
+```json
+{
+  "url": "https://example.com/article",
+  "html": "<html>...</html>"
+}
+```
+
+#### Response
+
+Same as Parse URL endpoint.
 
 ## License
 

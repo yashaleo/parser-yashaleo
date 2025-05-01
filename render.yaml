@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: parser-api
+    env: node
+    buildCommand: yarn build
+    startCommand: yarn start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    autoDeploy: true
