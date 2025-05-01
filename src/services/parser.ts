@@ -1,122 +1,121 @@
 // src/services/parser.ts
-
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
-import TurndownService from 'turndown';
+import { extract } from '@extractus/article-extractor';
 import { fetchWithRetry } from '../utils/http.js';
-import { fetchDynamicContent } from './puppeteer.js';
 import { summarizeContent } from './ai.js';
 import logger from '../utils/logger.js';
+import config from '../config/index.js';
 
-interface ParserOptions {
-  format?: 'html' | 'markdown' | 'text';
-  summarize?: boolean;
-  usePuppeteer?: boolean;
+/**
+ * Extract text content from HTML without tags
+ *
+ * @param html - HTML content
+ * @returns Plain text
+ */
+function extractTextFromHtml(html: string): string {
+  const dom = new JSDOM(html);
+  return dom.window.document.body.textContent?.trim() || '';
 }
 
-export interface ReadabilityArticle {
-  title: string;
-  content: string;
-  textContent: string;
-  length: number;
-  excerpt: string;
-  byline: string;
-  dir: string;
-  siteName: string;
-  lang: string;
-  publishedTime: string | null;
-  summary?: string;
-}
-
-export const parse = async (
-  url: string,
-  options: ParserOptions = {}
-): Promise<ReadabilityArticle> => {
+/**
+ * Extract main content from a web page
+ *
+ * @param url - URL to parse
+ * @param options - Parsing options
+ * @returns Parsed content object
+ */
+export const parse = async (url: string, options: any = {}): Promise<any> => {
+  logger.info(`Parsing URL: ${url}`);
+  
   try {
-    let html: string;
-
-    if (options.usePuppeteer) {
-      html = await fetchDynamicContent(url);
-    } else {
-      html = await fetchWithRetry(url, {
-        maxRetries: 3,
-        retryDelay: 1000,
-        timeout: 15000,
+    // Check if article-extractor is enabled
+    if (config.articleExtractor.enabled) {
+      // Fetch content using article-extractor
+      const article = await extract(url, {}, {
+        headers: {
+          'User-Agent': config.articleExtractor.userAgent
+        },
+        timeout: config.articleExtractor.timeout
       });
-
-      if (
-        html.includes('paywall') ||
-        html.includes('subscribe') ||
-        html.includes('premium content')
-      ) {
-        html = await fetchDynamicContent(url);
+      
+      if (article && article.content) {
+        logger.info(`Successfully extracted content from ${url}`);
+        
+        // Prepare the result object
+        const result: any = {
+          title: article.title || '',
+          content: article.content || '',
+          textContent: article.textContent || extractTextFromHtml(article.content),
+          excerpt: article.description || '',
+          author: article.author || '',
+          url: url
+        };
+        
+        // Generate summary if requested
+        if (options.summarize) {
+          logger.info(`Generating summary for ${url}`);
+          result.summary = await summarizeContent(result.textContent);
+        }
+        
+        return result;
       }
     }
-
-    const dom = new JSDOM(html, { url });
-    const reader = new Readability(dom.window.document);
-    const rawArticle = reader.parse();
-
-    if (!rawArticle) {
-      throw new Error('Failed to parse content');
-    }
-
-    const article: ReadabilityArticle = {
-      ...rawArticle,
-      summary: undefined,
-    };
-
-    if (options.format === 'markdown') {
-      const turndownService = new TurndownService();
-      article.content = turndownService.turndown(article.content);
-    } else if (options.format === 'text') {
-      article.content = article.textContent;
-    }
-
-    if (options.summarize) {
-      article.summary = await summarizeContent(article.textContent);
-    }
-
-    return article;
-  } catch (error: any) {
-    logger.error(`Error parsing URL ${url}:`, error);
-    throw new Error(`Failed to parse URL: ${error.message}`);
+    
+    // Fall back to direct HTTP fetch if article-extractor is disabled or failed
+    logger.info(`Falling back to HTTP fetch for ${url}`);
+    const html = await fetchWithRetry(url);
+    return parseHtml(html, url, options);
+  } catch (error) {
+    logger.error(`Error parsing ${url}: ${error}`);
+    throw error;
   }
 };
 
-export const parseHtml = async (
-  url: string,
-  html: string,
-  options: ParserOptions = {}
-): Promise<ReadabilityArticle> => {
+/**
+ * Parse HTML content using Readability
+ *
+ * @param html - HTML content to parse
+ * @param url - Original URL
+ * @param options - Parsing options
+ * @returns Parsed content object
+ */
+export const parseHtml = async (html: string, url: string, options: any = {}): Promise<any> => {
+  logger.info(`Parsing HTML from ${url}`);
+  
   try {
     const dom = new JSDOM(html, { url });
     const reader = new Readability(dom.window.document);
-    const rawArticle = reader.parse();
-
-    if (!rawArticle) {
-      throw new Error('Failed to parse content');
+    const article = reader.parse();
+    
+    if (!article) {
+      logger.warn(`Failed to parse article from ${url}`);
+      return {
+        title: '',
+        content: html,
+        textContent: extractTextFromHtml(html),
+        excerpt: '',
+        url: url
+      };
     }
-
-    const article: ReadabilityArticle = {
-      ...rawArticle,
-      summary: undefined,
+    
+    const result: any = {
+      title: article.title || '',
+      content: article.content || '',
+      textContent: article.textContent || '',
+      excerpt: article.excerpt || '',
+      url: url
     };
-
-    if (options.format === 'markdown') {
-      const turndownService = new TurndownService();
-      article.content = turndownService.turndown(article.content);
-    } else if (options.format === 'text') {
-      article.content = article.textContent;
-    }
-
+    
+    // Generate summary if requested
     if (options.summarize) {
-      article.summary = await summarizeContent(article.textContent);
+      logger.info(`Generating summary for ${url}`);
+      result.summary = await summarizeContent(result.textContent);
     }
-
-    return article;
-  } catch (error: any) {
-    logger.error('Error parsing HTML:', error);
-    throw new Error(`Failed to parse HTML: ${error.message}`);
+    
+    return result;
+  } catch (error) {
+    logger.error(`Error parsing HTML from ${url}: ${error}`);
+    throw error;
   }
 };

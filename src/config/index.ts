@@ -19,9 +19,8 @@ interface Config {
     cacheEnabled: boolean;
     cacheTTL: number;
   };
-  puppeteer: {
+  articleExtractor: {
     enabled: boolean;
-    headless: boolean | "new" | "shell"; // 👈 Update this line to include "new" and "shell"
     userAgent: string;
     timeout: number;
   };
@@ -51,13 +50,12 @@ const config: Config = {
     cacheEnabled: process.env.CACHE_ENABLED === 'true',
     cacheTTL: parseInt(process.env.CACHE_TTL || '3600', 10),
   },
-  puppeteer: {
-    enabled: process.env.PUPPETEER_ENABLED !== 'false',
-    headless: 'new',
+  articleExtractor: {
+    enabled: process.env.ARTICLE_EXTRACTOR_ENABLED !== 'false',
     userAgent:
-      process.env.PUPPETEER_USER_AGENT ||
+      process.env.ARTICLE_EXTRACTOR_USER_AGENT ||
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    timeout: parseInt(process.env.PUPPETEER_TIMEOUT || '30000', 10),
+    timeout: parseInt(process.env.ARTICLE_EXTRACTOR_TIMEOUT || '30000', 10),
   },
   ai: {
     enabled: process.env.AI_ENABLED === 'true',

@@ -11,7 +11,7 @@ interface SourceConfig {
   };
   paywall?: {
     indicators: string[];
-    bypassStrategy?: 'puppeteer' | 'headers' | 'cookie';
+    bypassStrategy?: 'article-extractor' | 'headers' | 'cookie';
   };
 }
 
@@ -27,7 +27,7 @@ const sources: Record<string, SourceConfig> = {
     },
     paywall: {
       indicators: ['subscribe', 'subscription', 'account'],
-      bypassStrategy: 'puppeteer',
+      bypassStrategy: 'article-extractor', 
     },
   },
   'medium.com': {
@@ -50,12 +50,10 @@ const sources: Record<string, SourceConfig> = {
 
 export const getSourceConfig = (url: string): SourceConfig => {
   const { hostname } = new URL(url);
-
   // Find the most specific matching domain
   const matchingSource = Object.values(sources).find(
     source => hostname.includes(source.domain) && source.domain !== '*'
   );
-
   return matchingSource || sources.default;
 };
 

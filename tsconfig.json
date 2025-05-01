@@ -15,7 +15,7 @@
     "skipLibCheck": true,
     "allowJs": true,
     "noEmit": false,
-    "types": ["node", "jest", "puppeteer"],
+    "types": ["node", "jest"],
     "isolatedModules": true,
     "baseUrl": "./src",
     "paths": {
