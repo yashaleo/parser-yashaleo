@@ -5,9 +5,9 @@
   "license": "MIT",
   "main": "src/handler.ts",
   "scripts": {
-    "build": "node_modules/.bin/serverless webpack",
+    "build": "yarn install && node_modules/.bin/serverless webpack",
     "start": "node_modules/.bin/serverless offline start",
-    "dev": "nodemon --exec serverless offline start",
+    "dev": "nodemon --exec node_modules/.bin/serverless offline start",
     "test": "jest",
     "lint": "eslint ./src --fix",
     "deploy": "cross-env NODE_ENV=dev yarn deploy:env",
