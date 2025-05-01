@@ -1,66 +1,92 @@
 // src/services/classification.ts
-import { Configuration, OpenAIApi } from 'openai';
+
+import OpenAI from 'openai';
+import logger from '../utils/logger';
 
 export interface ClassificationResult {
   categories: string[];
   topics: string[];
   sentiment: 'positive' | 'neutral' | 'negative';
   readingLevel: 'basic' | 'intermediate' | 'advanced';
+  error?: string;
 }
 
-export const classifyContent = async (title: string, content: string): Promise<ClassificationResult> => {
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+/**
+ * Uses OpenAI GPT to classify article content.
+ *
+ * @param title - Article title
+ * @param content - Article body or excerpt
+ * @returns Classification result object
+ */
+export const classifyContent = async (
+  title: string,
+  content: string
+): Promise<ClassificationResult> => {
   if (!process.env.OPENAI_API_KEY) {
-    // Return default classification if no API key
     return {
       categories: ['Uncategorized'],
       topics: [],
       sentiment: 'neutral',
-      readingLevel: 'intermediate'
+      readingLevel: 'intermediate',
     };
   }
 
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-  const openai = new OpenAIApi(configuration);
-  
   const prompt = `
     Analyze the following article title and excerpt.
-    Title: ${title}
-    Content excerpt: ${content.substring(0, 1000)}...
     
-    Provide a JSON response with:
-    1. categories: Array of up to 3 main categories (like Technology, Politics, Health)
-    2. topics: Array of specific topics/tags
-    3. sentiment: Overall tone (positive, neutral, or negative)
-    4. readingLevel: Estimated reading difficulty (basic, intermediate, or advanced)
+    Title: ${title}
+    Content excerpt: ${content.substring(0, 1000)}
+    
+    Respond only in this JSON format:
+    {
+      "categories": ["Category1", "Category2"],
+      "topics": ["tag1", "tag2"],
+      "sentiment": "positive" | "neutral" | "negative",
+      "readingLevel": "basic" | "intermediate" | "advanced"
+    }
   `;
 
   try {
-    const response = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4',
       messages: [
-        { role: "system", content: "You are a content analysis assistant. Respond only with valid JSON." },
-        { role: "user", content: prompt }
+        {
+          role: 'system',
+          content: 'You are a content analysis assistant. Respond only with valid JSON.',
+        },
+        { role: 'user', content: prompt },
       ],
       temperature: 0.3,
     });
 
-    const result = JSON.parse(response.data.choices[0]?.message?.content || '{}');
-    
+    const contentText = response.choices?.[0]?.message?.content || '{}';
+
+    let result: Partial<ClassificationResult> = {};
+
+    try {
+      result = JSON.parse(contentText);
+    } catch (parseErr) {
+      logger.error('Failed to parse OpenAI JSON response:', parseErr);
+    }
+
     return {
-      categories: result.categories || ['Uncategorized'],
-      topics: result.topics || [],
-      sentiment: result.sentiment || 'neutral',
-      readingLevel: result.readingLevel || 'intermediate'
+      categories: result.categories ?? ['Uncategorized'],
+      topics: result.topics ?? [],
+      sentiment: result.sentiment ?? 'neutral',
+      readingLevel: result.readingLevel ?? 'intermediate',
     };
   } catch (error) {
-    console.error('Error classifying content:', error);
+    logger.error('Error classifying content:', error);
     return {
       categories: ['Uncategorized'],
       topics: [],
       sentiment: 'neutral',
-      readingLevel: 'intermediate'
+      readingLevel: 'intermediate',
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 };

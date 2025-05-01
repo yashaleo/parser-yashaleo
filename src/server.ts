@@ -1,20 +1,21 @@
 // src/server.ts
-import express from 'express';
+
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
+import helmet from 'helmet';
 import parser from './handlers/parser';
 import parseHtml from './handlers/parse-html';
 import logger from './utils/logger';
-import helmet from 'helmet';
-
-
-app.use(helmet());
 
 const app = express();
 const port = process.env.PORT || 10000;
 
-// Swagger definition
+// Add security headers
+app.use(helmet());
+
+// Swagger configuration
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -24,27 +25,29 @@ const swaggerOptions = {
       description: 'API for parsing and extracting clean content from web pages',
       contact: {
         name: 'API Support',
-        email: 'support@example.com'
-      }
+        email: 'support@example.com',
+      },
     },
     servers: [
       {
         url: process.env.API_URL || `http://localhost:${port}`,
-        description: 'Development server'
-      }
-    ]
+        description: 'Development server',
+      },
+    ],
   },
-  apis: ['./src/routes/*.ts']
+  apis: ['./src/routes/*.ts'], // optional: adjust if your route handlers are defined elsewhere
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// ✅ Type-safe fix for Express + swaggerUi.serve
+app.use('/api-docs', ...swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.status(200).send('OK');
 });
 
@@ -79,7 +82,7 @@ app.get('/health', (req, res) => {
  *       500:
  *         description: Server error
  */
-app.get('/parser', async (req, res) => {
+app.get('/parser', async (req: Request, res: Response) => {
   try {
     const event = {
       queryStringParameters: req.query,
@@ -128,7 +131,7 @@ app.get('/parser', async (req, res) => {
  *       500:
  *         description: Server error
  */
-app.post('/parse-html', async (req, res) => {
+app.post('/parse-html', async (req: Request, res: Response) => {
   try {
     const event = {
       body: JSON.stringify(req.body),

@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2022",                            // Modern target with async/await, top-level await
-    "module": "ESNext",                            // Best for Webpack 5 tree-shaking
-    "moduleResolution": "node",                    // Standard for Node.js
-    "lib": ["ES2022"],                             // Modern JS features
-    "outDir": "dist",                            // Optional: separate compiled files
-    "rootDir": "src",                              // Keeps output clean
-    "strict": true,                                // Enables all strict checks
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ES2022"],
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -14,11 +14,15 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true,                          // Faster builds; safe for most
-    "allowJs": true,                               // In case JS is still used
-    "noEmit": false,                                // Prevents output if using only with Webpack
-    "types": ["node", "jest"],                             // Includes Node.js globals
-    "isolatedModules": true                        // Required for Babel+TS
+    "skipLibCheck": true,
+    "allowJs": true,
+    "noEmit": false,
+    "types": ["node", "jest", "puppeteer"],
+    "isolatedModules": true,
+    "baseUrl": "./src",                        // Enables cleaner relative imports
+    "paths": {
+      "*": ["*", "./*"]
+    }
   },
   "include": ["src/**/*", "src/types"],
   "exclude": ["node_modules", ".build"]

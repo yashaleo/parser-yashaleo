@@ -21,7 +21,7 @@ interface Config {
   };
   puppeteer: {
     enabled: boolean;
-    headless: 'new' | boolean;
+    headless: boolean | 'new'; // 👈 allow 'new' explicitly
     userAgent: string;
     timeout: number;
   };
@@ -54,7 +54,9 @@ const config: Config = {
   puppeteer: {
     enabled: process.env.PUPPETEER_ENABLED !== 'false',
     headless: 'new',
-    userAgent: process.env.PUPPETEER_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    userAgent:
+      process.env.PUPPETEER_USER_AGENT ||
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     timeout: parseInt(process.env.PUPPETEER_TIMEOUT || '30000', 10),
   },
   ai: {

@@ -14,12 +14,18 @@ module.exports = {
   extends: [
     'airbnb-base',
     'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended'
+    'plugin:prettier/recommended',
   ],
   plugins: ['@typescript-eslint', 'import', 'prettier'],
   settings: {
     'import/resolver': {
-      typescript: {},
+      typescript: {
+        alwaysTryTypes: true,
+        project: './tsconfig.json',
+      },
+      node: {
+        extensions: ['.js', '.ts'],
+      },
     },
   },
   rules: {
@@ -35,6 +41,8 @@ module.exports = {
     ],
     'import/no-unresolved': 'error',
     'import/prefer-default-export': 'off',
+    'import/no-extraneous-dependencies': 'off',
     '@typescript-eslint/no-unused-vars': ['warn'],
+    '@typescript-eslint/no-explicit-any': ['warn'],
   },
 };

@@ -1,6 +1,5 @@
-import parseHtml from '../../src/parse-html';
+import parseHtml from '../../src/handlers/parse-html';
 
-// Mock dependencies
 jest.mock('@mozilla/readability', () => ({
   Readability: jest.fn().mockImplementation(() => ({
     parse: jest.fn().mockReturnValue({
@@ -13,92 +12,69 @@ jest.mock('@mozilla/readability', () => ({
 }));
 
 jest.mock('jsdom', () => ({
-  JSDOM: jest.fn().mockImplementation(() => ({
+  JSDOM: jest.fn().mockImplementation(html => ({
     window: {
-      document: {},
+      document: {
+        documentElement: {
+          innerHTML: html,
+        },
+      },
     },
   })),
 }));
 
 describe('parseHtml handler', () => {
-  let mockCallback: jest.Mock;
-  
-  beforeEach(() => {
-    mockCallback = jest.fn();
-  });
-  
   it('should return error when body is missing', async () => {
-    await parseHtml({ body: null } as any, {} as any, mockCallback);
-    
-    expect(mockCallback).toHaveBeenCalledWith(
-      null,
-      expect.objectContaining({
-        statusCode: 500,
-        body: expect.stringContaining('Missing request body'),
-      })
-    );
+    const response = await parseHtml({ body: null } as any, {} as any);
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toContain('Missing request body');
   });
-  
+
   it('should return error when url or html is missing', async () => {
-    await parseHtml(
-      { body: JSON.stringify({ url: 'https://example.com' }) } as any, 
-      {} as any, 
-      mockCallback
+    const response = await parseHtml(
+      { body: JSON.stringify({ url: 'https://example.com' }) } as any,
+      {} as any
     );
-    
-    expect(mockCallback).toHaveBeenCalledWith(
-      null,
-      expect.objectContaining({
-        statusCode: 500,
-        body: expect.stringContaining('URL and HTML must be provided'),
-      })
-    );
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toContain('URL and HTML must be provided');
   });
-  
+
   it('should parse HTML and return result', async () => {
-    await parseHtml(
-      { 
-        body: JSON.stringify({ 
-          url: 'https://example.com', 
-          html: '<html><body><article>Test</article></body></html>' 
-        }) 
-      } as any, 
-      {} as any, 
-      mockCallback
+    const response = await parseHtml(
+      {
+        body: JSON.stringify({
+          url: 'https://example.com',
+          html: '<html><body><article>Test</article></body></html>',
+        }),
+      } as any,
+      {} as any
     );
-    
-    expect(mockCallback).toHaveBeenCalledWith(
-      null,
-      expect.objectContaining({
-        statusCode: 200,
-        body: expect.stringContaining('Test Title'),
-      })
-    );
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain('Test Title');
+    expect(response.body).toContain('Test Content');
   });
-  
+
   it('should handle parsing errors', async () => {
-    // Override mock to return null for this test only
-    require('@mozilla/readability').Readability.mockImplementationOnce(() => ({
+    // Force Readability to return null just for this test
+    const mockReadability = require('@mozilla/readability').Readability;
+    mockReadability.mockImplementationOnce(() => ({
       parse: jest.fn().mockReturnValue(null),
     }));
-    
-    await parseHtml(
-      { 
-        body: JSON.stringify({ 
-          url: 'https://example.com', 
-          html: '<html><body>Invalid Content</body></html>' 
-        }) 
-      } as any, 
-      {} as any, 
-      mockCallback
+
+    const response = await parseHtml(
+      {
+        body: JSON.stringify({
+          url: 'https://example.com',
+          html: '<html><body>Invalid Content</body></html>',
+        }),
+      } as any,
+      {} as any
     );
-    
-    expect(mockCallback).toHaveBeenCalledWith(
-      null,
-      expect.objectContaining({
-        statusCode: 500,
-        body: expect.stringContaining('Failed to parse HTML'),
-      })
-    );
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toContain('Failed to parse HTML');
   });
 });

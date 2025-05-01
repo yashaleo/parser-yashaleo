@@ -1,59 +1,68 @@
-import puppeteer from 'puppeteer';
+// src/services/puppeteer.ts
 
-export const fetchDynamicContent = async (url: string) => {
+import puppeteer from 'puppeteer';
+import logger from '../utils/logger';
+import type { Page } from 'puppeteer';
+/**
+ * Fetches and renders HTML content from a URL using Puppeteer for JavaScript execution
+ */
+export const fetchDynamicContent = async (url: string): Promise<string> => {
   const browser = await puppeteer.launch({
-    headless: 'new',
+    headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
-  
+
   try {
     const page = await browser.newPage();
-    
-    // Set user agent to avoid blocking
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-    
-    // Set extra HTTP headers to bypass simple paywalls
+
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    );
+
     await page.setExtraHTTPHeaders({
-      'Accept': 'text/html,application/xhtml+xml,application/xml',
+      Accept: 'text/html,application/xhtml+xml,application/xml',
       'Accept-Language': 'en-US,en;q=0.9',
       'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache',
+      Pragma: 'no-cache',
     });
-    
-    // Add timeout
-    await page.goto(url, { 
+
+    await page.goto(url, {
       waitUntil: 'networkidle2',
-      timeout: 30000 
+      timeout: 30000,
     });
-    
-    // Wait for content to load
-    await page.waitForSelector('article, .article, .post, .content, main', { 
-      timeout: 5000 
-    }).catch(() => {
-      console.log('No specific content selector found, using body');
-    });
-    
-    // Scroll to load lazy content
+
+    await page
+      .waitForSelector('article, .article, .post, .content, main', {
+        timeout: 5000,
+      })
+      .catch(() => {
+        logger.info('No specific content selector found, using body');
+      });
+
     await autoScroll(page);
-    
-    // Try to dismiss modals/popups
     await dismissPopups(page);
-    
-    // Extract the HTML content
-    const html = await page.content();
-    return html;
+
+    return await page.content();
+  } catch (error) {
+    logger.error(`Error fetching dynamic content from ${url}:`, error);
+    throw new Error(
+      `Failed to fetch dynamic content: ${error instanceof Error ? error.message : String(error)}`
+    );
   } finally {
     await browser.close();
   }
 };
 
-async function autoScroll(page: puppeteer.Page) {
+/**
+ * Scrolls the page to load lazy content
+ */
+async function autoScroll(page: Page): Promise<void> {
   await page.evaluate(async () => {
-    await new Promise<void>((resolve) => {
+    await new Promise<void>(resolve => {
       let totalHeight = 0;
       const distance = 100;
       const timer = setInterval(() => {
-        const scrollHeight = document.body.scrollHeight;
+        const { scrollHeight } = document.body;
         window.scrollBy(0, distance);
         totalHeight += distance;
 
@@ -66,55 +75,33 @@ async function autoScroll(page: puppeteer.Page) {
   });
 }
 
-async function dismissPopups(page: puppeteer.Page) {
+/**
+ * Attempts to dismiss common popup/modal dialogs
+ */
+async function dismissPopups(page: Page): Promise<void> {
   try {
-    // Common selectors for popups, modals, and paywalls
     const selectors = [
-      '.modal-close', '.close-button', '.dismiss', '.paywall-close',
-      'button:contains("Close")', 'button:contains("No Thanks")',
-      'button:contains("I\'ll Pass")', 'button:contains("Not Now")',
-      '[aria-label="Close"]', '[data-testid="popup-close"]'
+      '.modal-close',
+      '.close-button',
+      '.dismiss',
+      '.paywall-close',
+      'button:contains("Close")',
+      'button:contains("No Thanks")',
+      'button:contains("I\'ll Pass")',
+      'button:contains("Not Now")',
+      '[aria-label="Close"]',
+      '[data-testid="popup-close"]',
     ];
-    
+
     for (const selector of selectors) {
-      await page.evaluate((sel) => {
+      await page.evaluate((sel: string) => {
         const elements = document.querySelectorAll(sel);
         elements.forEach(el => {
-          if (el instanceof HTMLElement) {
-            el.click();
-          }
+          if (el instanceof HTMLElement) el.click();
         });
       }, selector);
     }
   } catch (error) {
-    console.log('Error dismissing popups:', error);
+    logger.warn('Error dismissing popups:', error);
   }
 }
-
-// Example test for puppeteer.ts
-describe('Puppeteer Service', () => {
-  it('should fetch dynamic content', async () => {
-    // Mock browser and page
-    const mockPage = {
-      goto: jest.fn().mockResolvedValue({}),
-      setUserAgent: jest.fn(),
-      setExtraHTTPHeaders: jest.fn(),
-      waitForSelector: jest.fn().mockResolvedValue({}),
-      evaluate: jest.fn(),
-      content: jest.fn().mockResolvedValue('<html><body>Dynamic content</body></html>')
-    };
-    
-    const mockBrowser = {
-      newPage: jest.fn().mockResolvedValue(mockPage),
-      close: jest.fn().mockResolvedValue({})
-    };
-    
-    jest.spyOn(puppeteer, 'launch').mockResolvedValue(mockBrowser as any);
-    
-    const result = await fetchDynamicContent('https://example.com');
-    
-    expect(result).toBe('<html><body>Dynamic content</body></html>');
-    expect(puppeteer.launch).toHaveBeenCalled();
-    expect(mockPage.goto).toHaveBeenCalledWith('https://example.com', expect.any(Object));
-  });
-});

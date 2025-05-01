@@ -43,8 +43,16 @@ describe('Parser', () => {
     const result = await parse('https://example.com');
     
     expect(result).toEqual(mockArticle);
-    expect(global.fetch).toHaveBeenCalledWith('https://example.com');
-  });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://example.com',
+      expect.objectContaining({
+        signal: expect.any(Object),
+        headers: expect.objectContaining({
+          'User-Agent': expect.any(String),
+        }),
+      })
+    );
+  }); // ✅ This was missing!
 
   it('should handle parsing errors', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
