@@ -4,6 +4,9 @@
   "author": "Postlight",
   "description": "The serverless Postlight Parser API",
   "main": "src/handler.js",
+  "engines": {
+    "node": ">=18.18.0 <19.0.0"
+  },
   "scripts": {
     "deploy:env": "cross-env-shell sls deploy --stage $NODE_ENV",
     "deploy": "cross-env NODE_ENV=dev yarn deploy:env",
