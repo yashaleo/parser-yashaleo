@@ -1,27 +1,25 @@
-interface IJSON {
+interface JsonBody {
   [key: string]: any;
 }
 
-interface IResponseOptions {
-  json: IJSON;
+interface LambdaResponseOptions {
+  json: JsonBody;
   statusCode: number;
   allowCORS?: boolean;
 }
 
-interface IResponse {
+interface LambdaResponse {
   statusCode: number;
   body: string;
-  headers?: {
-    [key: string]: any;
-  };
+  headers?: Record<string, string>;
 }
 
 function lambdaResponse({
   json,
   statusCode,
   allowCORS = false,
-}: IResponseOptions) {
-  const response: IResponse = {
+}: LambdaResponseOptions): LambdaResponse {
+  const response: LambdaResponse = {
     statusCode,
     body: JSON.stringify(json),
   };
@@ -29,38 +27,28 @@ function lambdaResponse({
   if (allowCORS) {
     response.headers = {
       'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
     };
   }
 
   return response;
 }
 
-export function errorResponse(json: IJSON) {
-  return lambdaResponse({
-    json,
-    statusCode: 500,
-  });
+// === Exported helpers ===
+
+export function errorResponse(json: JsonBody) {
+  return lambdaResponse({ json, statusCode: 500 });
 }
 
-export function corsErrorResponse(json: IJSON) {
-  return lambdaResponse({
-    json,
-    statusCode: 500,
-    allowCORS: true,
-  });
+export function corsErrorResponse(json: JsonBody) {
+  return lambdaResponse({ json, statusCode: 500, allowCORS: true });
 }
 
-export function successResponse(json: IJSON) {
-  return lambdaResponse({
-    json,
-    statusCode: 200,
-  });
+export function successResponse(json: JsonBody) {
+  return lambdaResponse({ json, statusCode: 200 });
 }
 
-export function corsSuccessResponse(json: IJSON) {
-  return lambdaResponse({
-    json,
-    statusCode: 200,
-    allowCORS: true,
-  });
+export function corsSuccessResponse(json: JsonBody) {
+  return lambdaResponse({ json, statusCode: 200, allowCORS: true });
 }

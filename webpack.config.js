@@ -1,7 +1,14 @@
-const nodeExternals = require('webpack-node-externals');
-const slsw = require('serverless-webpack');
+// webpack.config.mjs
+import nodeExternals from 'webpack-node-externals';
+import slsw from 'serverless-webpack';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+export default {
   entry: slsw.lib.entries,
   target: 'node',
   mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
@@ -10,12 +17,11 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        loader: 'ts-loader',
         exclude: /node_modules/,
       },
       {
         test: /\.jsx?$/,
-        include: __dirname,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
@@ -24,6 +30,14 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.jsx'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+  },
+  optimization: {
+    minimize: false,
+  },
+  output: {
+    libraryTarget: 'commonjs2',
+    path: path.resolve(__dirname, '.webpack'),
+    filename: '[name].js',
   },
 };

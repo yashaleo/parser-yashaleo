@@ -1,2 +1,8 @@
 export { default as runWarm } from './run-warm';
-export * from './lambda-response';
+
+export {
+  corsSuccessResponse,
+  corsErrorResponse,
+  successResponse,
+  errorResponse,
+} from './lambda-response';

@@ -1,6 +1,17 @@
+# Node modules and environment
 node_modules
 .env
+.env*
+
+# Build and deploy artifacts
 .webpack
 .serverless
-.env*
 .build
+dist
+coverage
+
+# Logs and OS junk
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store

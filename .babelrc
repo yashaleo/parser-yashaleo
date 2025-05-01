@@ -4,9 +4,12 @@
       "@babel/preset-env",
       {
         "targets": {
-          "node": "8.10"
-        }
+          "node": "current"
+        },
+        "modules": "commonjs"
       }
-    ]
-  ]
+    ],
+    "@babel/preset-typescript"
+  ],
+  "plugins": []
 }
