@@ -6,6 +6,10 @@ import swaggerJsDoc from 'swagger-jsdoc';
 import parser from './handlers/parser';
 import parseHtml from './handlers/parse-html';
 import logger from './utils/logger';
+import helmet from 'helmet';
+
+
+app.use(helmet());
 
 const app = express();
 const port = process.env.PORT || 10000;

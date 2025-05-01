@@ -1,6 +1,6 @@
 // Main entry point for AWS Lambda
-import parser from './parser';
-import parseHtml from './parse-html';
+import parser from './handlers/parser';
+import parseHtml from './handlers/parse-html';
 
 // Export handlers
 export { 

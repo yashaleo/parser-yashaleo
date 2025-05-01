@@ -1,3 +1,4 @@
+//"start": "node --expose-gc dist/server.js"
 // src/utils/memory-monitor.ts
 import logger from './logger';
 

@@ -90,3 +90,31 @@ async function dismissPopups(page: puppeteer.Page) {
     console.log('Error dismissing popups:', error);
   }
 }
+
+// Example test for puppeteer.ts
+describe('Puppeteer Service', () => {
+  it('should fetch dynamic content', async () => {
+    // Mock browser and page
+    const mockPage = {
+      goto: jest.fn().mockResolvedValue({}),
+      setUserAgent: jest.fn(),
+      setExtraHTTPHeaders: jest.fn(),
+      waitForSelector: jest.fn().mockResolvedValue({}),
+      evaluate: jest.fn(),
+      content: jest.fn().mockResolvedValue('<html><body>Dynamic content</body></html>')
+    };
+    
+    const mockBrowser = {
+      newPage: jest.fn().mockResolvedValue(mockPage),
+      close: jest.fn().mockResolvedValue({})
+    };
+    
+    jest.spyOn(puppeteer, 'launch').mockResolvedValue(mockBrowser as any);
+    
+    const result = await fetchDynamicContent('https://example.com');
+    
+    expect(result).toBe('<html><body>Dynamic content</body></html>');
+    expect(puppeteer.launch).toHaveBeenCalled();
+    expect(mockPage.goto).toHaveBeenCalledWith('https://example.com', expect.any(Object));
+  });
+});

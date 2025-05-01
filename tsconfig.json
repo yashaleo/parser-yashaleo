@@ -4,7 +4,7 @@
     "module": "ESNext",                            // Best for Webpack 5 tree-shaking
     "moduleResolution": "node",                    // Standard for Node.js
     "lib": ["ES2022"],                             // Modern JS features
-    "outDir": ".build",                            // Optional: separate compiled files
+    "outDir": "dist",                            // Optional: separate compiled files
     "rootDir": "src",                              // Keeps output clean
     "strict": true,                                // Enables all strict checks
     "noImplicitAny": true,

@@ -55,12 +55,13 @@ export const classifyContent = async (title: string, content: string): Promise<C
       readingLevel: result.readingLevel || 'intermediate'
     };
   } catch (error) {
-    console.error('Error classifying content:', error);
+    logger.error('Error classifying content:', error);
     return {
       categories: ['Uncategorized'],
       topics: [],
       sentiment: 'neutral',
-      readingLevel: 'intermediate'
+      readingLevel: 'intermediate',
+      error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
 };

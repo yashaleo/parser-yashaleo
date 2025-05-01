@@ -1,5 +1,5 @@
 // src/parser.test.ts
-import { parse } from './parser';
+import { parse } from '../../src/services/parser';
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
 
