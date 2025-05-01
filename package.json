@@ -21,7 +21,7 @@
   "dependencies": {
     "@postlight/parser": "^2.2.2",
     "@types/aws-lambda": "^8.10.120",
-    "serverless": "^3.38.0"
+    "serverless": "^4.14.1"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
