@@ -4,26 +4,38 @@ import { extract } from '@extractus/article-extractor';
 import { fetchArticleContent } from '../../src/services/article-extractor.js';
 
 // Mock @extractus/article-extractor
-jest.mock('@extractus/article-extractor', () => ({
-  extract: jest.fn()
-}), { virtual: true });
+jest.mock(
+  '@extractus/article-extractor',
+  () => ({
+    extract: jest.fn(),
+  }),
+  { virtual: true }
+);
 
 // Mock the logger to prevent console output during tests
-jest.mock('../../src/utils/logger.js', () => ({
-  info: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn()
-}), { virtual: true });
+jest.mock(
+  '../../src/utils/logger.js',
+  () => ({
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+  }),
+  { virtual: true }
+);
 
 // Mock the config
-jest.mock('../../src/config/index.js', () => ({
-  default: {
-    articleExtractor: {
-      userAgent: 'Test User Agent',
-      timeout: 15000
-    }
-  }
-}), { virtual: true });
+jest.mock(
+  '../../src/config/index.js',
+  () => ({
+    default: {
+      articleExtractor: {
+        userAgent: 'Test User Agent',
+        timeout: 15000,
+      },
+    },
+  }),
+  { virtual: true }
+);
 
 describe('Article Extractor Service', () => {
   beforeEach(() => {
@@ -37,7 +49,7 @@ describe('Article Extractor Service', () => {
       content: '<div>Test content</div>',
       textContent: 'Test content',
       description: 'Test description',
-      author: 'Test Author'
+      author: 'Test Author',
     };
 
     // Setup the mock to return our mock article
@@ -48,16 +60,16 @@ describe('Article Extractor Service', () => {
 
     // Verify the result
     expect(result).toEqual(mockArticle);
-    
+
     // Verify extract was called with expected arguments
     expect(extract).toHaveBeenCalledWith(
       'https://example.com',
       {},
       {
         headers: {
-          'User-Agent': 'Test User Agent'
+          'User-Agent': 'Test User Agent',
         },
-        timeout: 15000
+        timeout: 15000,
       }
     );
   });

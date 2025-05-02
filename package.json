@@ -18,6 +18,7 @@
     "lint": "eslint ./src --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "husky install",
+    "prepush": "yarn lint && yarn format && tsc --noEmit && yarn test && yarn build",
     "deploy": "cross-env NODE_ENV=production yarn build"
   },
   "engines": {
@@ -52,6 +53,7 @@
     "@types/turndown": "^5.0.4",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
+    "dependency-cruiser": "^16.10.1",
     "eslint": "^9.25.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^10.1.2",

@@ -15,7 +15,7 @@
     "skipLibCheck": true,
     "allowJs": true,
     "noEmit": false,
-    "types": ["node", "jest"],
+    "types": ["node", "jest", "jsdom"],
     "isolatedModules": true,
     "baseUrl": "./src",
     "paths": {

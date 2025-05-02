@@ -11,11 +11,7 @@ module.exports = {
     sourceType: 'module',
     project: './tsconfig.json',
   },
-  extends: [
-    'airbnb-base',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-  ],
+  extends: ['airbnb-base', 'plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
   plugins: ['@typescript-eslint', 'import', 'prettier'],
   settings: {
     'import/resolver': {

@@ -6,13 +6,7 @@ import eslintPluginImport from 'eslint-plugin-import';
 export default [
   ...tseslint.configs.recommended,
   {
-    ignores: [
-      'node_modules/**',
-      'dist/**',
-      'coverage/**',
-      '.webpack/**',
-      'fixtures/**',
-    ],
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**', '.webpack/**', 'fixtures/**'],
   },
   {
     files: ['**/*.ts'],
@@ -25,8 +19,8 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tseslint.plugin,
-      'prettier': eslintPluginPrettier,
-      'import': eslintPluginImport,
+      prettier: eslintPluginPrettier,
+      import: eslintPluginImport,
     },
     rules: {
       'prettier/prettier': 'warn',
@@ -35,8 +29,8 @@ export default [
         'error',
         'ignorePackages',
         {
-          'ts': 'never',
-          'js': 'never',
+          ts: 'never',
+          js: 'never',
         },
       ],
       'import/no-unresolved': 'error',

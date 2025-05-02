@@ -11,16 +11,20 @@ import config from '../config/index.js';
  */
 export const fetchDynamicContent = async (url: string): Promise<string> => {
   logger.info(`Fetching content from: ${url}`);
-  
+
   try {
     // Extract article with custom user agent from config
-    const article = await extract(url, {}, {
-      headers: {
-        'User-Agent': config.articleExtractor.userAgent
-      },
-      timeout: config.articleExtractor.timeout
-    });
-    
+    const article = await extract(
+      url,
+      {},
+      {
+        headers: {
+          'User-Agent': config.articleExtractor.userAgent,
+        },
+        timeout: config.articleExtractor.timeout,
+      }
+    );
+
     // Return the content or the full HTML if no content was extracted
     if (article && article.content) {
       logger.info(`Successfully extracted content from ${url}`);
@@ -37,22 +41,26 @@ export const fetchDynamicContent = async (url: string): Promise<string> => {
 
 /**
  * For direct access to full article data
- * 
+ *
  * @param url - The URL to fetch content from
  * @returns The complete article object
  */
 export const fetchArticleContent = async (url: string): Promise<any> => {
   logger.info(`Fetching article data from: ${url}`);
-  
+
   try {
     // Extract article with custom user agent from config
-    const article = await extract(url, {}, {
-      headers: {
-        'User-Agent': config.articleExtractor.userAgent
-      },
-      timeout: config.articleExtractor.timeout
-    });
-    
+    const article = await extract(
+      url,
+      {},
+      {
+        headers: {
+          'User-Agent': config.articleExtractor.userAgent,
+        },
+        timeout: config.articleExtractor.timeout,
+      }
+    );
+
     return article;
   } catch (error) {
     logger.error(`Error extracting article from ${url}: ${error}`);

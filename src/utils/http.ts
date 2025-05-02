@@ -61,7 +61,5 @@ export const fetchWithRetry = async (
     }
   }
 
-  throw lastError instanceof Error
-    ? lastError
-    : new Error('Unknown error during fetchWithRetry');
-}
+  throw lastError instanceof Error ? lastError : new Error('Unknown error during fetchWithRetry');
+};

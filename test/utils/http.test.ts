@@ -37,21 +37,19 @@ describe('HTTP Utilities', () => {
     });
 
     it('should retry on network failure', async () => {
-      jest.spyOn(global, 'setTimeout').mockImplementation((fn) => {
+      jest.spyOn(global, 'setTimeout').mockImplementation(fn => {
         setTimeout(fn as Function, 0);
         return 1 as unknown as NodeJS.Timeout;
       });
 
-      mockFetch
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce({
-          ok: true,
-          text: jest.fn().mockResolvedValue('<html>Test</html>'),
-        } as any);
+      mockFetch.mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({
+        ok: true,
+        text: jest.fn().mockResolvedValue('<html>Test</html>'),
+      } as any);
 
       const result = await fetchWithRetry('https://example.com', {
         maxRetries: 3,
-        retryDelay: 1, 
+        retryDelay: 1,
         timeout: 5000,
       });
 

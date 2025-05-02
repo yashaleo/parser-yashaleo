@@ -1,7 +1,7 @@
 // Main entry point for AWS Lambda
 import parser from './handlers/parser.js';
 import parseHtml from './handlers/parse-html.js';
-import logger from './utils/logger.js'; 
+import logger from './utils/logger.js';
 
 // Export handlers
 export { parser, parseHtml };

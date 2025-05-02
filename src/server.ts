@@ -1,11 +1,11 @@
 // src/server.ts
-
-// src/server.ts
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsDoc from 'swagger-jsdoc';
 import helmet from 'helmet';
+// Import types from aws-lambda for proper typing
+import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 // Fix the imports to use .js extension (required for ESM)
 import parser from './handlers/parser.js';
 import parseHtml from './handlers/parse-html.js';
@@ -54,6 +54,47 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 /**
+ * Create a properly typed mock event for Lambda handlers
+ */
+function createMockEvent(params: Record<string, unknown>, body?: string): APIGatewayProxyEvent {
+  return {
+    queryStringParameters: params as Record<string, string>,
+    body: body || null, // Changed this line to handle null case
+    headers: {},
+    multiValueHeaders: {},
+    httpMethod: '',
+    isBase64Encoded: false,
+    path: '',
+    pathParameters: null,
+    multiValueQueryStringParameters: null,
+    stageVariables: null,
+    requestContext: {} as any,
+    resource: '',
+  };
+}
+/**
+ * Create a minimal mock context for Lambda handlers
+ */
+function createMockContext(): Context {
+  return {
+    callbackWaitsForEmptyEventLoop: false,
+    functionName: '',
+    functionVersion: '',
+    invokedFunctionArn: '',
+    memoryLimitInMB: '',
+    awsRequestId: '',
+    logGroupName: '',
+    logStreamName: '',
+    identity: undefined as any,
+    clientContext: undefined as any,
+    getRemainingTimeInMillis: () => 0,
+    done: () => {},
+    fail: () => {},
+    succeed: () => {},
+  };
+}
+
+/**
  * @swagger
  * /parser:
  *   get:
@@ -86,10 +127,10 @@ app.get('/health', (_req: Request, res: Response) => {
  */
 app.get('/parser', async (req: Request, res: Response) => {
   try {
-    const event = {
-      queryStringParameters: req.query,
-    };
-    const result = await parser(event as any, {} as any);
+    const event = createMockEvent(req.query);
+    const context = createMockContext();
+
+    const result = await parser(event, context);
     res.status(result.statusCode).json(JSON.parse(result.body));
   } catch (error) {
     logger.error('Parser error:', error);
@@ -135,10 +176,10 @@ app.get('/parser', async (req: Request, res: Response) => {
  */
 app.post('/parse-html', async (req: Request, res: Response) => {
   try {
-    const event = {
-      body: JSON.stringify(req.body),
-    };
-    const result = await parseHtml(event as any, {} as any);
+    const event = createMockEvent({}, JSON.stringify(req.body));
+    const context = createMockContext();
+
+    const result = await parseHtml(event, context);
     res.status(result.statusCode).json(JSON.parse(result.body));
   } catch (error) {
     logger.error('Parse HTML error:', error);

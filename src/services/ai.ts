@@ -17,7 +17,7 @@ const openai = createOpenAI();
 
 /**
  * Summarizes article content using OpenAI GPT-4.
- * 
+ *
  * @param content - The full text content of the article
  * @returns A short summary string
  */

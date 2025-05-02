@@ -4,11 +4,15 @@ import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // Mock the OpenAI module
 jest.mock('openai');
-jest.mock('../../src/utils/logger.js', () => ({
-  info: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn()
-}), { virtual: true });
+jest.mock(
+  '../../src/utils/logger.js',
+  () => ({
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+  }),
+  { virtual: true }
+);
 
 describe('Content Classification Service', () => {
   beforeEach(() => {

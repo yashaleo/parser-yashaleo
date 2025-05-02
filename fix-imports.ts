@@ -6,11 +6,11 @@ const srcDir = './src';
 
 function processDirectory(directory: string): void {
   const files = fs.readdirSync(directory);
-  
+
   for (const file of files) {
     const filePath = path.join(directory, file);
     const stat = fs.statSync(filePath);
-    
+
     if (stat.isDirectory()) {
       processDirectory(filePath);
     } else if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
@@ -21,7 +21,7 @@ function processDirectory(directory: string): void {
 
 function fixImports(filePath: string): void {
   let content = fs.readFileSync(filePath, 'utf8');
-  
+
   // Fix relative imports that don't have .js extension
   // This pattern looks for import statements with relative paths without extensions
   const importRegex = /from\s+['"](\.[^'"]*)['"]/g;
@@ -32,7 +32,7 @@ function fixImports(filePath: string): void {
     }
     return `from '${importPath}.js'`;
   });
-  
+
   fs.writeFileSync(filePath, content);
   console.log(`Fixed imports in ${filePath}`);
 }

@@ -27,7 +27,7 @@ const sources: Record<string, SourceConfig> = {
     },
     paywall: {
       indicators: ['subscribe', 'subscription', 'account'],
-      bypassStrategy: 'article-extractor', 
+      bypassStrategy: 'article-extractor',
     },
   },
   'medium.com': {
