@@ -13,10 +13,19 @@ interface SourceConfig {
     indicators: string[];
     bypassStrategy?: 'article-extractor' | 'headers' | 'cookie';
   };
-  specialCleaning?: boolean; // Added to interface definition
+  specialCleaning?: boolean;
 }
 
 const sources: Record<string, SourceConfig> = {
+  'overreacted.io': {
+    name: 'Overreacted',
+    domain: 'overreacted.io',
+    selectors: {
+      title: 'h1',
+      content: 'div.post-content',
+    },
+    specialCleaning: true,
+  },
   'nytimes.com': {
     name: 'The New York Times',
     domain: 'nytimes.com',

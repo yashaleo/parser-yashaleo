@@ -55,6 +55,64 @@ function decodeHtmlEntities(html: string): string {
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ');
 }
+// Add this to src/services/parser.ts after the existing decodeHtmlEntities function
+
+/**
+ * Enhanced HTML cleaning specifically for code blocks and nested spans
+ */
+function improvedHtmlCleaning(html: string, url: string): string {
+  try {
+    const dom = new JSDOM(html);
+    const document = dom.window.document;
+
+    // Process and clean code blocks
+    document.querySelectorAll('code, pre').forEach(codeBlock => {
+      // Replace nested spans with their text content
+      const spans = codeBlock.querySelectorAll('span');
+      if (spans.length > 3) {
+        // Only process if there are multiple spans (likely syntax highlighting)
+        // This code block likely contains syntax highlighting spans
+        let codeText = '';
+        spans.forEach(span => {
+          codeText += span.textContent || '';
+        });
+
+        // Replace the messy code block with clean code
+        codeBlock.innerHTML = decodeHtmlEntities(codeText);
+      } else {
+        // Just decode entities in regular code blocks
+        codeBlock.innerHTML = decodeHtmlEntities(codeBlock.innerHTML);
+      }
+    });
+
+    // Clean up divs with pre/code that might be formatted oddly
+    document.querySelectorAll('div > pre').forEach(pre => {
+      const parent = pre.parentElement;
+      if (parent && parent.childNodes.length === 1) {
+        // This div only contains a pre tag, so replace div with pre's content
+        parent.replaceWith(pre);
+      }
+    });
+
+    // Remove unnecessary nested spans throughout the document
+    document.querySelectorAll('span > span').forEach(nestedSpan => {
+      const parent = nestedSpan.parentElement;
+      if (parent && parent.tagName.toLowerCase() === 'span') {
+        // If this is a nested span that only contains text, flatten it
+        if (nestedSpan.childNodes.length === 1 && nestedSpan.firstChild?.nodeType === 3) {
+          const text = nestedSpan.textContent || '';
+          const textNode = document.createTextNode(text);
+          parent.replaceChild(textNode, nestedSpan);
+        }
+      }
+    });
+
+    return document.body.innerHTML;
+  } catch (error) {
+    logger.error(`Error in improved HTML cleaning: ${error}`);
+    return html; // Return original as fallback
+  }
+}
 
 /**
  * Safely process HTML to prevent memory issues with very large content
@@ -160,6 +218,21 @@ function cleanHtmlContent(html: string, url: string): string {
   try {
     // Get site-specific configuration
     const sourceConfig = getSourceConfig(url);
+
+    // Check if this is a site that needs special handling for nested spans and complex HTML
+    const needsSpecialCleaning =
+      url.includes('overreacted.io') ||
+      url.includes('medium.com') ||
+      html.includes('&lt;span&gt;') ||
+      (html.match(/<span[^>]*><span/g)?.length || 0) > 10; // Detect excessive nested spans
+
+    if (needsSpecialCleaning) {
+      logger.info(`Applying special HTML cleaning for ${url}`);
+      const cleanedHtml = improvedHtmlCleaning(html, url);
+
+      // Apply special cleaning first, then continue with regular cleaning
+      return cleanHtmlContent(cleanedHtml, url);
+    }
 
     // Apply special cleaning for known problematic sites
     if (sourceConfig.specialCleaning) {
